@@ -13,6 +13,7 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseException;
+import com.google.firebase.FirebaseTooManyRequestsException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
@@ -30,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
     //firebase authentication
     FirebaseAuth mAuth;
 
-    String codeVerfication;
+    String mVerificationId;
+    PhoneAuthProvider.ForceResendingToken mResendToken;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
         String code = mEditTextCode.getText().toString();
 
-        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(codeVerfication, code);
+        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(mVerificationId, code);
         signInWithPhoneAuthCredential(credential);
     }
 
@@ -121,19 +123,28 @@ public class MainActivity extends AppCompatActivity {
     PhoneAuthProvider.OnVerificationStateChangedCallbacks mCallbacks = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
         @Override
         public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
-
+            signInWithPhoneAuthCredential(phoneAuthCredential);
         }
 
         @Override
         public void onVerificationFailed(FirebaseException e) {
-
+            if (e instanceof FirebaseAuthInvalidCredentialsException) {
+                // Invalid request
+                // ...
+                Toast.makeText(MainActivity.this, "Invalid request", Toast.LENGTH_SHORT).show();
+            } else if (e instanceof FirebaseTooManyRequestsException) {
+                // The SMS quota for the project has been exceeded
+                // ...
+                Toast.makeText(MainActivity.this, "The SMS quota for the project has been exceeded", Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
         public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
             super.onCodeSent(s, forceResendingToken);
 
-            codeVerfication = s;
+            mVerificationId = s;
+            mResendToken = forceResendingToken;
         }
     };
 }

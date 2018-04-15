@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">FirebaseLoginAuth</string>
+
+    <!--strings for loginActivity-->
+    <string name="hint_email">Email</string>
+    <string name="hint_passowrd">Password</string>
+    <string name="reset_pswd">Reset password?</string>
+    <string name="button_login">LOGIN</string>
+    <string name="no_account_yet">Don\'t have an account? SignUp</string>
 </resources>
